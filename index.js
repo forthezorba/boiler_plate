@@ -1,15 +1,25 @@
-var express = require("express");
-var app = express();
+const express = require("express");
+const app = express();
 const port = 5000;
-const mongoose = require("mongoose");
+const bodyParser = require("body-parser");
 
+const config = require('./config/key');
+const { User } = require("./models/User");
+
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
+
+const mongoose = require("mongoose");
 mongoose
-  .connect('mongodb+srv://admin:blbjzTqnthPYhRuf@movynoty-qbkn2.mongodb.net/test?retryWrites=true&w=majority', {
-    useNewUrlParser: true,
-    useFindAndModify: false,
-    useUnifiedTopology: true,
-    useCreateIndex: true,
-  })
+  .connect(
+    config.mongoURI,
+    {
+      useNewUrlParser: true,
+      useFindAndModify: false,
+      useUnifiedTopology: true,
+      useCreateIndex: true,
+    }
+  )
   .then(() => {
     console.log("Connected to MongoDB");
   })
@@ -18,7 +28,20 @@ mongoose
   });
 // respond with "hello world" when a GET request is made to the homepage
 app.get("/", function (req, res) {
-  res.send("hello world");
+  res.send("hello world2");
+});
+
+//회원가입
+app.post("/register", (req, res) => {
+  console.log(req.body);
+
+  const user = new User(req.body);
+  user.save((err, userInfo) => {
+    if (err) return res.json({ success: false, err });
+    return res.status(200).json({
+      success: true,
+    });
+  });
 });
 
 app.listen(port, () => console.log(`listening ${port}`));
